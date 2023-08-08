@@ -1,0 +1,343 @@
+User:
+
+Here is the code that is written in C#10:
+namespace UseCase7
+{
+    public class Student
+    {
+        public string Name { get; set; }
+        public int Age { get; set; }
+        public int Grade { get; set; }
+        public bool Exceptional { get; set; }
+        public bool HonorRoll { get; set; }
+        public bool Passed { get; set; }
+    }
+
+    public class StudentConverter
+    {
+        public List<Student> ConvertStudents(List<Student> students)
+        {
+            return students.Select(student =>
+            {
+                var result = new Student
+                {
+                    Name = student.Name,
+                    Age = student.Age,
+                    Grade = student.Grade
+                };
+
+                if (student.Grade > 90)
+                {
+                    if (student.Age < 21)
+                    {
+                        result.Exceptional = true;
+                    }
+                    else
+                    {
+                        result.HonorRoll = true;
+                    }
+                }
+                else if (student.Grade > 70)
+                {
+                    result.Passed = true;
+                }
+                else
+                {
+                    result.Passed = false;
+                }
+
+                return result;
+            }).ToList();
+        }
+    }
+
+}
+
+And the unit tests that were written for this code using XUnit testing framework and Should_ExpectedBehavior_When_StateUnderTest tests naming pattern:
+
+namespace UseCase7.Tests.StudentConverter
+{
+    public class StudentConverter_Positive_Tests
+    {
+        private readonly UseCase7.StudentConverter _studentConverter;
+
+        public StudentConverter_Positive_Tests()
+        {
+            _studentConverter = new UseCase7.StudentConverter();
+        }
+
+        [Fact]
+        public void Should_SetHonorRollTrue_When_AgeAbove21AndGradeAbove90()
+        {
+            var students = new List<Student> { new Student { Age = 22, Grade = 91 } };
+            var result = _studentConverter.ConvertStudents(students);
+
+            Assert.Single(result);
+            Assert.True(result[0].HonorRoll);
+        }
+
+        [Fact]
+        public void Should_SetExceptionalTrue_When_AgeBelow21AndGradeAbove90()
+        {
+            var students = new List<Student> { new Student { Age = 20, Grade = 91 } };
+            var result = _studentConverter.ConvertStudents(students);
+
+            Assert.Single(result);
+            Assert.True(result[0].Exceptional);
+        }
+
+        [Fact]
+        public void Should_SetPassedTrue_When_GradeBetween71And90()
+        {
+            var students = new List<Student> { new Student { Age = 20, Grade = 80 } };
+            var result = _studentConverter.ConvertStudents(students);
+
+            Assert.Single(result);
+            Assert.True(result[0].Passed);
+        }
+
+        [Fact]
+        public void Should_SetPassedFalse_When_Grade70OrBelow()
+        {
+            var students = new List<Student> { new Student { Age = 20, Grade = 70 } };
+            var result = _studentConverter.ConvertStudents(students);
+
+            Assert.Single(result);
+            Assert.False(result[0].Passed);
+        }
+    }
+}
+
+namespace UseCase7.Tests.StudentConverter
+{
+    public class StudentConverter_Negative_Tests
+    {
+        private readonly UseCase7.StudentConverter _studentConverter;
+
+        public StudentConverter_Negative_Tests()
+        {
+            _studentConverter = new UseCase7.StudentConverter();
+        }
+
+        [Fact]
+        public void Should_ReturnEmptyList_When_InputListIsEmpty()
+        {
+            var students = new List<Student>();
+            var result = _studentConverter.ConvertStudents(students);
+
+            Assert.Empty(result);
+        }
+
+        [Fact]
+        public void Should_ThrowException_When_InputIsNull()
+        {
+            Assert.Throws<ArgumentNullException>(() => _studentConverter.ConvertStudents(null));
+        }
+    }
+}
+
+Just remember it
+
+ChatGPT:
+
+Alright, I've reviewed the C# code you've provided, which pertains to a StudentConverter class and its associated unit tests using the XUnit framework.
+
+How can I assist you further with it?
+
+
+User:
+
+And also remember this peace of code also written in C#10:
+
+namespace UseCase7
+{
+    public class Player
+    {
+        public string Name { get; set; }
+        public int Age { get; set; }
+        public int Experience { get; set; }
+        public List<int> Skills { get; set; }
+    }
+
+    public class PlayerAnalyzer
+    {
+        public double CalculateScore(List<Player> players)
+        {
+            double score = 0;
+
+            foreach (var player in players)
+            {
+                double skillsAverage = player.Skills.Sum() / (double)player.Skills.Count;
+                double contribution = player.Age * player.Experience * skillsAverage;
+
+                if (player.Age < 18)
+                {
+                    contribution *= 0.5;
+                }
+
+                if (player.Experience > 10)
+                {
+                    contribution *= 1.2;
+                }
+
+                score += contribution;
+            }
+
+            return score;
+        }
+    }
+
+}
+
+And the unit tests that were written using XUnit framework along with XUnit Fixture approach, IDisposable pattern and Should_ExpectedBehavior_When_StateUnderTest test naming pattern:
+
+namespace UseCase7.Tests.PlayerAnalyzer
+{
+    public class PlayerAnalyzerFixture : IDisposable
+    {
+        public UseCase7.PlayerAnalyzer Analyzer { get; } = new UseCase7.PlayerAnalyzer();
+        public List<Player> Players { get; set; } = new List<Player>();
+
+        public void Dispose()
+        {
+            Players.Clear();
+        }
+    }
+}
+
+namespace UseCase7.Tests.PlayerAnalyzer
+{
+    [Collection("PlayerAnalyzer")]
+    public class PlayerAnalyzer_Positive_Tests: IClassFixture<PlayerAnalyzerFixture>, IDisposable
+    {
+        private readonly PlayerAnalyzerFixture _fixture;
+
+        public PlayerAnalyzer_Positive_Tests(PlayerAnalyzerFixture fixture)
+        {
+            _fixture = fixture;
+        }
+
+        [Fact]
+        public void Should_Return250_When_SinglePlayerAge25Experience5AndSkillsAll2()
+        {
+            _fixture.Players.Add(new Player { Age = 25, Experience = 5, Skills = new List<int> { 2, 2, 2 } });
+
+            Assert.Equal(250, _fixture.Analyzer.CalculateScore(_fixture.Players));
+        }
+
+        [Fact]
+        public void Should_Return67Point5_When_SinglePlayerAge15Experience3AndSkillsAll3()
+        {
+            _fixture.Players.Add(new Player { Age = 15, Experience = 3, Skills = new List<int> { 3, 3, 3 } });
+
+            Assert.Equal(67.5, _fixture.Analyzer.CalculateScore(_fixture.Players));
+        }
+
+        [Fact]
+        public void Should_Return2520_When_SinglePlayerAge35Experience15AndSkillsAll4()
+        {
+            _fixture.Players.Add(new Player { Age = 35, Experience = 15, Skills = new List<int> { 4, 4, 4 } });
+
+            Assert.Equal(2520, _fixture.Analyzer.CalculateScore(_fixture.Players));
+        }
+
+        [Fact]
+        public void Should_ReturnSumOfScores_When_MultiplePlayers()
+        {
+            _fixture.Players.AddRange(new List<Player>
+            {
+                new Player { Age = 25, Experience = 5, Skills = new List<int> { 2, 2, 2 } },
+                new Player { Age = 15, Experience = 3, Skills = new List<int> { 3, 3, 3 } },
+                new Player { Age = 35, Experience = 15, Skills = new List<int> { 4, 4, 4 } }
+            });
+
+            Assert.Equal(2837.5, _fixture.Analyzer.CalculateScore(_fixture.Players));
+        }
+
+        public void Dispose()
+        {
+            _fixture.Dispose();
+        }
+    }
+}
+
+namespace UseCase7.Tests.PlayerAnalyzer
+{
+    public class PlayerAnalyzer_Negative_Tests : IClassFixture<PlayerAnalyzerFixture>, IDisposable
+    {
+        private readonly PlayerAnalyzerFixture _fixture;
+
+        public PlayerAnalyzer_Negative_Tests(PlayerAnalyzerFixture fixture)
+        {
+            _fixture = fixture;
+        }
+
+        public void Dispose()
+        {
+            _fixture.Dispose();
+        }
+
+        [Fact]
+        public void Should_ThrowError_When_PlayerSkillsAreNull()
+        {
+            _fixture.Players.Add(new Player { Age = 25, Experience = 5, Skills = null });
+
+            Assert.Throws<ArgumentNullException>(() => _fixture.Analyzer.CalculateScore(_fixture.Players));
+        }
+
+        [Fact]
+        public void Should_Return0_When_PlayerArrayIsEmpty()
+        {
+            double score = _fixture.Analyzer.CalculateScore(_fixture.Players);
+            Assert.Equal(0, score);
+        }
+    }
+}
+
+ChatGPT:
+
+I've reviewed the second set of code you've shared which deals with a PlayerAnalyzer class and its unit tests using XUnit. This class is used to calculate a score for a list of players based on their age, experience, and skills. The unit tests are organized using the IClassFixture and IDisposable patterns, a common way to manage setup and cleanup for unit test classes in xUnit.
+
+Is there a specific question or area you'd like to focus on regarding this code?
+
+
+User:
+
+Now generate a readme file with the next requirements:
+1. Test description: 2 paragraphs, 4-10 Sentences.
+2. 	Information on how to run tests locally.
+
+ChatGPT:
+
+README - UseCase7 Tests
+Test Description
+The UseCase7 testing suite is primarily focused on two main classes: StudentConverter and PlayerAnalyzer. The StudentConverter class is designed to convert student data, especially by marking specific attributes such as being exceptional or on the honor roll, based on their age and grade. Its tests ensure that the conversion logic functions as expected. The PlayerAnalyzer class, on the other hand, evaluates player data to calculate a score based on a player's age, experience, and skillset. Through its tests, it is ensured that the score computation is accurate, catering to various edge cases and scenarios.
+
+The tests have been categorized into Positive and Negative tests. Positive tests confirm the expected behavior under normal or beneficial circumstances, while negative tests ensure robustness by checking behavior under unintended or harmful inputs. Both of these categories are further reinforced by using the xUnit framework, leveraging features such as IClassFixture for test setup and IDisposable for cleanup, ensuring that each test runs in a fresh state.
+
+How to Run Tests Locally
+Prerequisites: Before you begin, ensure you have the following installed:
+
+.NET SDK (Version recommended: .NET 5.0 or later)
+A preferred code editor or IDE (e.g., Visual Studio, Visual Studio Code)
+Clone the Repository:
+
+bash
+Copy code
+git clone [repository-url]
+cd [repository-name]
+Restore Dependencies:
+In your terminal or command prompt, navigate to the project directory and run:
+
+bash
+Copy code
+dotnet restore
+Running the Tests:
+Navigate to the test project directory (UseCase7.Tests) and execute the following command:
+
+bash
+Copy code
+dotnet test
+Review Results: After the tests have completed running, the results will be displayed in the terminal. Look for any failures or errors and refer to the test logs for detailed information.
+
+That's it! You've successfully run the tests locally.
